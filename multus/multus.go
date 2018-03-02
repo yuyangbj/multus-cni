@@ -335,7 +335,7 @@ func getnetplugin(client *kubernetes.Clientset, networkname string, primary bool
 		return "", fmt.Errorf("getnetplugin: network name can't be empty")
 	}
 
-	tprclient := fmt.Sprintf("/apis/kubernetes.com/v1/namespaces/default/networks/%s", networkname)
+	tprclient := fmt.Sprintf("/apis/kubernetes.cni.cncf.io/v1/namespaces/default/networks/%s", networkname)
 
 	netobjdata, err := client.ExtensionsV1beta1().RESTClient().Get().AbsPath(tprclient).DoRaw()
 	if err != nil {
@@ -365,10 +365,6 @@ func getPodNetworkObj(client *kubernetes.Clientset, netObjs []map[string]interfa
 
 	for index, net := range netObjs {
 		var primary bool
-
-		if index == 0 {
-			primary = true
-		}
 
 		np, err = getnetplugin(client, net["name"].(string), primary)
 		if err != nil {
@@ -471,7 +467,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		}
 
 		if len(podDelegate) != 0 {
-			n.Delegates = podDelegate
+			n.Delegates = append(n.Delegates, podDelegate...)
 		}
 	}
 
